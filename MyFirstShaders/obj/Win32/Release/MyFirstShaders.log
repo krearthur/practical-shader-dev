@@ -1,0 +1,12 @@
+﻿  main.cpp
+  ofApp.cpp
+     Creating library bin\MyFirstShaders.lib and object bin\MyFirstShaders.exp
+  LINK : /LTCG specified but no code generation required; remove /LTCG from the link command line to improve linker performance
+  MyFirstShaders.vcxproj -> D:\Gamedev\OpenFrameworks\of_v0.11.0_vs2017_release\apps\myApps\MyFirstShaders\bin\MyFirstShaders.exe
+  
+  	                   2	D:\Gamedev\OpenFrameworks\of_v0.11.0_vs2017_release\libs\fmodex\lib\vs\Win32\
+  	  *EXTRA Datei		 6018560	D:\Gamedev\OpenFrameworks\of_v0.11.0_vs2017_release\apps\myApps\MyFirstShaders\bin\FreeImage.dll
+  
+  	                   1	D:\Gamedev\OpenFrameworks\of_v0.11.0_vs2017_release\libs\FreeImage\lib\vs\Win32\
+  	  *EXTRA Datei		 1266176	D:\Gamedev\OpenFrameworks\of_v0.11.0_vs2017_release\apps\myApps\MyFirstShaders\bin\fmodex.dll
+  	  *EXTRA Datei		 1312768	D:\Gamedev\OpenFrameworks\of_v0.11.0_vs2017_release\apps\myApps\MyFirstShaders\bin\fmodexL.dll
