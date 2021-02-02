@@ -24,5 +24,8 @@ class ofApp : public ofBaseApp{
 private:
     ofMesh quad;
     ofShader shader;
+    ofImage img1;
+    ofImage img2;
+
 		
 };

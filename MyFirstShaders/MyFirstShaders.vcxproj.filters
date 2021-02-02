@@ -26,5 +26,9 @@
     <None Include="bin\data\first_fragment.frag" />
     <None Include="bin\data\uv_passthrough.vert" />
     <None Include="bin\data\uv_vis.frag" />
+    <None Include="bin\data\texture.frag" />
+    <None Include="bin\data\scrolling_uv.vert" />
+    <None Include="bin\data\brightness.frag" />
+    <None Include="bin\data\mix.frag" />
   </ItemGroup>
 </Project>
