@@ -21,18 +21,28 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
+        glm::mat4 buildMatrix(glm::vec3 trans, float rot, glm::vec3 scale);
+
     private:
         void buildQuad(ofMesh& mesh, float w, float h, glm::vec3 pos);
+        void updateSprite();
 
         ofMesh charMesh;
         ofMesh backgroundMesh;
         ofMesh cloudMesh;
+        ofMesh sunMesh;
         
-        ofShader shader;
+        ofShader alphaTestShader;
         ofShader cloudShader;
+        ofShader spriteShader;
 
         ofImage alienImg;
         ofImage backgroundImg;
         ofImage cloudImg;
+        ofImage sunImg;
+
+        // character state / inputs
+        bool walkRight;
+        glm::vec3 charPos;
 		
 };
