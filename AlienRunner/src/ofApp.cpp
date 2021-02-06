@@ -8,8 +8,8 @@ void ofApp::setup(){
     // positions in normalized screen coordinates (0, 0 => center of screen)
     // these positions are effectively the ORIGINS of the meshes
     // so we set them to zero and use vertex shaders for actual positioning!
-    buildQuad(backgroundMesh, 1, 1, vec3(0.0, 0.0, 0.5));
-    buildQuad(sunMesh, 1.0, 1.0, vec3(0.0, 0.0, 0.4));
+    buildQuad(backgroundMesh, 1, 1, vec3(0.0, 0.0, -0.5));
+    buildQuad(sunMesh, 1.0, 1.0, vec3(0.0, 0.0, -0.4));
     buildQuad(cloudMesh, 0.35, 0.3, vec3(0.0, 0.0, 0.0));
     buildQuad(charMesh, 0.15, 0.2, vec3(0.0, -0.60, 0.0));
     
@@ -19,17 +19,19 @@ void ofApp::setup(){
     cloudImg.load("cloud.png");
     sunImg.load("sun_rays.png");
 
-    alphaTestShader.load("passthrough.vert", "alphaTest.frag");
-    cloudShader.load("cloud.vert", "cloud.frag");
+    opaqueShader.load("passthrough.vert", "alphaTest.frag");
+    cloudShader.load("passthrough.vert", "cloud.frag");
     spriteShader.load("spritesheet.vert", "alphaTest.frag");
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    if (walkRight) {
-        float speed = 0.4 * ofGetLastFrameTime();
-        charPos += vec3(speed, 0, 0);
-    }
+    
+    float speed = 0.4 * ofGetLastFrameTime();
+    charPos += vec3(inputDir.x * speed, inputDir.y * speed, 0);
+
+    cam.position += vec3(camInputDir.x * speed, camInputDir.y * speed, 0);
+    
 }
 
 //--------------------------------------------------------------
@@ -38,24 +40,32 @@ void ofApp::draw(){
     ofDisableBlendMode();
     ofEnableDepthTest();
 
+    mat4 view = buildViewMatrix(cam);
+    float aspectRatio = 1024.0f / 768.0f;
+    mat4 proj = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, 0.0f, 10.0f);
+
     // draw character
     spriteShader.begin();
-
     updateSprite();
-
+    mat4 charMatrix = buildMatrix(charPos, 0.0, vec3(1, 1, 1));
+    spriteShader.setUniformMatrix4f("model", charMatrix);
+    spriteShader.setUniformMatrix4f("view", view);
+    spriteShader.setUniformMatrix4f("proj", proj);
     spriteShader.setUniformTexture("tex", alienImg, 0);
-    spriteShader.setUniform3f("position", charPos);
     charMesh.draw();
     spriteShader.end();
 
     // draw background
-    alphaTestShader.begin();
-    alphaTestShader.setUniformTexture("tex", backgroundImg, 0);
+    opaqueShader.begin();
+    opaqueShader.setUniformMatrix4f("model", mat4());
+    opaqueShader.setUniformMatrix4f("view", view);
+    opaqueShader.setUniformMatrix4f("proj", proj);
+    opaqueShader.setUniformTexture("tex", backgroundImg, 0);
     backgroundMesh.draw();
 
     // disabling depth testing means we dont draw depth information to the depth buffer anymore
     ofDisableDepthTest();
-    alphaTestShader.end();
+    opaqueShader.end();
 
     // draw cloud
     ofEnableBlendMode(ofBlendMode::OF_BLENDMODE_ALPHA);
@@ -63,26 +73,41 @@ void ofApp::draw(){
     // rotate cloud over time
     static float rotation = 0.0f;
     rotation += 1.0f * ofGetLastFrameTime();
-    mat4 transformA = buildMatrix(vec3(-0.55, 0.0, 0.0), rotation, vec3(1.5, 1, 1));
-    mat4 transformB = buildMatrix(vec3(0.4, 0.2, 0.0), 1.0f, vec3(1, 1, 1));
 
+    // Construct the transform for our un-rotated cloud
+    mat4 translationA = glm::translate(vec3(-0.55, 0.0, 0.0));
+    mat4 scaleA = glm::scale(vec3(1.5, 1, 1));
+    mat4 transformA = translationA * scaleA;
+
+    // Apply a rotation to that
+    mat4 ourRotation = glm::rotate(rotation, vec3(0.0, 0.0, 1.0));
+    mat4 newMatrix = translationA * ourRotation * glm::inverse(translationA);
+    mat4 finalMatrixA = newMatrix * transformA;
+
+    mat4 transformB = buildMatrix(vec3(0.4, 0.2, 0.0), 1.0f, vec3(1, 1, 1));
+    
     cloudShader.begin();
+    cloudShader.setUniformMatrix4f("view", view);
+    cloudShader.setUniformMatrix4f("proj", proj);
     cloudShader.setUniformTexture("tex", cloudImg, 0);
 
-    cloudShader.setUniformMatrix4f("transform", transformA);
+    cloudShader.setUniformMatrix4f("model", finalMatrixA);
     cloudMesh.draw();
 
-    cloudShader.setUniformMatrix4f("transform", transformB);
+    cloudShader.setUniformMatrix4f("model", transformB);
     cloudMesh.draw();
     
     cloudShader.end();
 
     // draw the sun rays with additive blending
-    alphaTestShader.begin();
+    opaqueShader.begin();
     ofEnableBlendMode(ofBlendMode::OF_BLENDMODE_ADD);
-    alphaTestShader.setUniformTexture("tex", sunImg, 0);
+    opaqueShader.setUniformMatrix4f("model", mat4());
+    opaqueShader.setUniformMatrix4f("view", view);
+    opaqueShader.setUniformMatrix4f("proj", proj);
+    opaqueShader.setUniformTexture("tex", sunImg, 0);
     sunMesh.draw();
-    alphaTestShader.end();
+    opaqueShader.end();
 
   
 }
@@ -96,15 +121,38 @@ void ofApp::updateSprite() {
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+    inputDir = vec2(0.0, 0.0);
     if (key == ofKey::OF_KEY_RIGHT) {
-        walkRight = true;
+        inputDir.x = 1.0;
     }
+    else if (key == ofKey::OF_KEY_LEFT) {
+        inputDir.x = -1.0;
+    }
+
+    camInputDir = vec2(0.0, 0.0);
+    if (key == 'a') {
+        camInputDir.x = -1.0;
+    }
+    else if (key == 'd') {
+        camInputDir.x = 1.0;
+    }
+    else if (key == 'w') {
+        camInputDir.y = 1.0;
+    }
+    else if (key == 's') {
+        camInputDir.y = -1.0;
+    }
+
 }
 
 //--------------------------------------------------------------
-void ofApp::keyReleased(int key){
-    if (key == ofKey::OF_KEY_RIGHT) {
-        walkRight = false;
+void ofApp::keyReleased(int key) {
+    if (key == ofKey::OF_KEY_RIGHT || key == ofKey::OF_KEY_LEFT) {
+        inputDir = vec2(0.0, 0.0);
+    }
+
+    if (key == 'a' || key == 'd' || key == 'w' || key == 's') {
+        camInputDir = vec2(0.0, 0.0);
     }
 }
 
@@ -186,4 +234,8 @@ mat4 ofApp::buildMatrix(vec3 trans, float rot, vec3 scale) {
 
     // by default openFrameworks uses column-major matrices, so the order is post-multiply aka from right to left
     return translation * rotation * scaler;
+}
+
+mat4 ofApp::buildViewMatrix(CameraData& cam) {
+    return inverse(buildMatrix(cam.position, cam.rotation, vec3(1, 1, 1)));
 }

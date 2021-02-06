@@ -2,6 +2,12 @@
 
 #include "ofMain.h"
 
+// Camera
+struct CameraData {
+    glm::vec3 position;
+    float rotation;
+};
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -22,6 +28,7 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 
         glm::mat4 buildMatrix(glm::vec3 trans, float rot, glm::vec3 scale);
+        glm::mat4 buildViewMatrix(CameraData& cam);
 
     private:
         void buildQuad(ofMesh& mesh, float w, float h, glm::vec3 pos);
@@ -32,7 +39,7 @@ class ofApp : public ofBaseApp{
         ofMesh cloudMesh;
         ofMesh sunMesh;
         
-        ofShader alphaTestShader;
+        ofShader opaqueShader;
         ofShader cloudShader;
         ofShader spriteShader;
 
@@ -42,7 +49,9 @@ class ofApp : public ofBaseApp{
         ofImage sunImg;
 
         // character state / inputs
-        bool walkRight;
+        glm::vec2 inputDir;
         glm::vec3 charPos;
-		
+
+        CameraData cam;
+        glm::vec2 camInputDir;
 };
