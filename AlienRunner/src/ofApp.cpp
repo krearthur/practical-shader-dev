@@ -8,7 +8,7 @@ void ofApp::setup(){
     // positions in normalized screen coordinates (0, 0 => center of screen)
     // these positions are effectively the ORIGINS of the meshes
     // so we set them to zero and use vertex shaders for actual positioning!
-    buildQuad(backgroundMesh, 1, 1, vec3(0.0, 0.0, -0.5));
+    buildQuad(backgroundMesh, 1, 1, vec3(0.0, 0.0, -9.99f));
     buildQuad(sunMesh, 1.0, 1.0, vec3(0.0, 0.0, -0.4));
     buildQuad(cloudMesh, 0.35, 0.3, vec3(0.0, 0.0, 0.0));
     buildQuad(charMesh, 0.15, 0.2, vec3(0.0, -0.60, 0.0));
@@ -41,7 +41,10 @@ void ofApp::draw(){
     ofEnableDepthTest();
 
     mat4 view = buildViewMatrix(cam);
-    float aspectRatio = 1024.0f / 768.0f;
+    vec2 window = ofGetWindowSize();
+
+    float aspectRatio = window.x / window.y;
+    
     mat4 proj = glm::ortho(-aspectRatio, aspectRatio, -1.0f, 1.0f, 0.0f, 10.0f);
 
     // draw character

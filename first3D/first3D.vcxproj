@@ -200,6 +200,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="bin\data\mesh.vert" />
+    <None Include="bin\data\normal_vis.frag" />
     <None Include="bin\data\passthrough.vert" />
     <None Include="bin\data\uv_vis.frag" />
   </ItemGroup>

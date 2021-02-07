@@ -6,7 +6,7 @@ void ofApp::setup(){
     ofEnableDepthTest();
     
     houseMesh.load("KameHouse.ply");
-    uvShader.load("mesh.vert", "uv_vis.frag");
+    meshShader.load("mesh.vert", "normal_vis.frag");
 
     // move cam a bit out of screen
     cam.position = glm::vec3(0, 0, 1);
@@ -33,13 +33,15 @@ void ofApp::draw(){
     mat4 model = rotate(radians(45.0f), vec3(0, 1, 0)) * scale(vec3(0.5, 0.5f, 0.5f));
     mat4 view = inverse(translate(cam.position));
     mat4 proj = perspective(cam.fov, aspect, 0.01f, 10.0f);
+    mat3 normalMatrix = (transpose(inverse(mat3(model))));
 
     mat4 mvp = proj * view * model;
     
-    uvShader.begin();
-    uvShader.setUniformMatrix4f("mvp", mvp);
+    meshShader.begin();
+    meshShader.setUniformMatrix4f("mvp", mvp);
+    meshShader.setUniformMatrix3f("normalMatrix", normalMatrix);
     houseMesh.draw();
-    uvShader.end();
+    meshShader.end();
 }
 
 //--------------------------------------------------------------
