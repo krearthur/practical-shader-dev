@@ -2,15 +2,24 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    using namespace glm;
+    ofSetBackgroundColor(ofColor::black);
     ofDisableArbTex();
     ofEnableDepthTest();
+    ofEnableAlphaBlending();
     
     houseMesh.load("KameHouse.ply");
-    meshShader.load("mesh.vert", "normal_vis.frag");
+    diffuseShader.load("mesh.vert", "rimlight.frag");
+    texture.load("KameHouseTex.png");
 
     // move cam a bit out of screen
     cam.position = glm::vec3(0, 0, 1);
+    
 
+    // setup light
+    light.direction = normalize(vec3(0, -1, 0)); // pointin down
+    light.color = vec3(1, 1, 1);
+    light.intensity = 1.0f;
 }
 
 //--------------------------------------------------------------
@@ -37,11 +46,17 @@ void ofApp::draw(){
 
     mat4 mvp = proj * view * model;
     
-    meshShader.begin();
-    meshShader.setUniformMatrix4f("mvp", mvp);
-    meshShader.setUniformMatrix3f("normalMatrix", normalMatrix);
+    diffuseShader.begin();
+    diffuseShader.setUniformTexture("mainTex", texture, 0);
+    diffuseShader.setUniformMatrix4f("mvp", mvp);
+    diffuseShader.setUniformMatrix4f("model", model);
+    diffuseShader.setUniformMatrix3f("normalMatrix", normalMatrix);
+    diffuseShader.setUniform3f("cameraPos", cam.position);
+    diffuseShader.setUniform3f("meshCol", glm::vec3(1, 1, 1)); 
+    diffuseShader.setUniform3f("lightDir", getLightDirection(light));
+    diffuseShader.setUniform3f("lightCol", getLightColor(light));
     houseMesh.draw();
-    meshShader.end();
+    diffuseShader.end();
 }
 
 //--------------------------------------------------------------
@@ -111,4 +126,12 @@ void ofApp::gotMessage(ofMessage msg){
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
 
+}
+
+glm::vec3 ofApp::getLightDirection(DirectionalLight& l) {
+    return glm::normalize(l.direction * -1.0f);
+}
+
+glm::vec3 ofApp::getLightColor(DirectionalLight& l) {
+    return l.color * l.intensity;
 }

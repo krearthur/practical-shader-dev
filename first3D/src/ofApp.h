@@ -8,6 +8,12 @@ struct CameraData {
     float fov;
 };
 
+struct DirectionalLight {
+    glm::vec3 direction;
+    glm::vec3 color;
+    float intensity;
+};
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -28,9 +34,13 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 
         ofMesh houseMesh;
-        ofShader meshShader;
+        ofShader diffuseShader;
+        ofImage texture;
 
-
+        DirectionalLight light;
         CameraData cam;
         glm::vec2 camInputDir;
+
+        glm::vec3 getLightDirection(DirectionalLight& l);
+        glm::vec3 getLightColor(DirectionalLight& l);
 };
