@@ -3,21 +3,22 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     using namespace glm;
-    ofSetBackgroundColor(ofColor::black);
+    ofSetBackgroundColor(ofColor::bisque);
     ofDisableArbTex();
     ofEnableDepthTest();
     ofEnableAlphaBlending();
     
-    houseMesh.load("KameHouse.ply");
-    diffuseShader.load("mesh.vert", "rimlight.frag");
-    texture.load("KameHouseTex.png");
+    
+    myMesh.load("Hero.ply");
+    diffuseShader.load("mesh.vert", "specular.frag");
+    texture.load("heroTex.png");
+    specular.load("heroSpec.png");
 
     // move cam a bit out of screen
-    cam.position = glm::vec3(0, 0, 1);
+    cam.position = glm::vec3(0, 0.35f, 0.75f);
     
-
     // setup light
-    light.direction = normalize(vec3(0, -1, 0)); // pointin down
+    light.direction = normalize(vec3(-1, -1, 0)); // pointin down
     light.color = vec3(1, 1, 1);
     light.intensity = 1.0f;
 }
@@ -27,7 +28,7 @@ void ofApp::update(){
     float speed = 0.4 * ofGetLastFrameTime();
     //charPos += vec3(inputDir.x * speed, inputDir.y * speed, 0);
 
-    cam.position += glm::vec3(camInputDir.x * speed, camInputDir.y * speed, 0);
+    cam.position += camInputDir * speed;
 
 }
 
@@ -48,6 +49,7 @@ void ofApp::draw(){
     
     diffuseShader.begin();
     diffuseShader.setUniformTexture("mainTex", texture, 0);
+    diffuseShader.setUniformTexture("specMap", specular, 1);
     diffuseShader.setUniformMatrix4f("mvp", mvp);
     diffuseShader.setUniformMatrix4f("model", model);
     diffuseShader.setUniformMatrix3f("normalMatrix", normalMatrix);
@@ -55,31 +57,38 @@ void ofApp::draw(){
     diffuseShader.setUniform3f("meshCol", glm::vec3(1, 1, 1)); 
     diffuseShader.setUniform3f("lightDir", getLightDirection(light));
     diffuseShader.setUniform3f("lightCol", getLightColor(light));
-    houseMesh.draw();
+    diffuseShader.setUniform3f("ambientCol", vec3(1, 1, 1) * 0.1);
+    myMesh.draw();
     diffuseShader.end();
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
-    camInputDir = glm::vec2(0.0, 0.0);
+    camInputDir = glm::vec3(0.0, 0.0, 0.0);
     if (key == 'a') {
         camInputDir.x = -1.0;
     }
     else if (key == 'd') {
         camInputDir.x = 1.0;
     }
-    else if (key == 'w') {
+    else if (key == 'q') {
         camInputDir.y = 1.0;
     }
-    else if (key == 's') {
+    else if (key == 'e') {
         camInputDir.y = -1.0;
+    }
+    else if (key == 'w') {
+        camInputDir.z = -1.0;
+    }
+    else if (key == 's') {
+        camInputDir.z = 1.0;
     }
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-    if (key == 'a' || key == 'd' || key == 'w' || key == 's') {
-        camInputDir = glm::vec2(0.0, 0.0);
+    if (key == 'a' || key == 'd' || key == 'w' || key == 's' || key =='q' || key == 'e') {
+        camInputDir = glm::vec3(0.0, 0.0, 0.0);
     }
 }
 

@@ -204,6 +204,7 @@
     <None Include="bin\data\normal_vis.frag" />
     <None Include="bin\data\passthrough.vert" />
     <None Include="bin\data\rimlight.frag" />
+    <None Include="bin\data\specular.frag" />
     <None Include="bin\data\uv_vis.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

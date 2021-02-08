@@ -33,13 +33,14 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-        ofMesh houseMesh;
+        ofMesh myMesh;
         ofShader diffuseShader;
         ofImage texture;
+        ofImage specular;
 
         DirectionalLight light;
         CameraData cam;
-        glm::vec2 camInputDir;
+        glm::vec3 camInputDir;
 
         glm::vec3 getLightDirection(DirectionalLight& l);
         glm::vec3 getLightColor(DirectionalLight& l);

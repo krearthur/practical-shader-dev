@@ -28,5 +28,6 @@
     <None Include="bin\data\normal_vis.frag" />
     <None Include="bin\data\diffuse.frag" />
     <None Include="bin\data\rimlight.frag" />
+    <None Include="bin\data\specular.frag" />
   </ItemGroup>
 </Project>
