@@ -7,6 +7,9 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -17,17 +20,22 @@
     <ClInclude Include="src\ofApp.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\data\passthrough.vert" />
-    <None Include="bin\data\mesh.vert" />
-    <None Include="bin\data\uv_vis.frag" />
-    <None Include="bin\data\normal_vis.frag" />
-    <None Include="bin\data\diffuse.frag" />
-    <None Include="bin\data\rimlight.frag" />
-    <None Include="bin\data\specular.frag" />
+    <None Include="bin\data\shaders\diffuse.frag" />
+    <None Include="bin\data\shaders\mesh.vert" />
+    <None Include="bin\data\shaders\normal_vis.frag" />
+    <None Include="bin\data\shaders\passthrough.vert" />
+    <None Include="bin\data\shaders\rimlight.frag" />
+    <None Include="bin\data\shaders\specular.frag" />
+    <None Include="bin\data\shaders\uv_vis.frag" />
+    <None Include="bin\data\shaders\water.vert" />
+    <None Include="bin\data\shaders\water.frag" />
   </ItemGroup>
 </Project>

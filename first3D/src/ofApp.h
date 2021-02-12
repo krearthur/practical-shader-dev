@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-// Camera
+
 struct CameraData {
     glm::vec3 position;
     float rotation;
@@ -33,15 +33,29 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-        ofMesh myMesh;
-        ofShader diffuseShader;
-        ofImage texture;
-        ofImage specular;
+private:
+        // Custom methods
+        void calcTangents(ofMesh& mesh);
+        void ofApp::drawShield(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& view);
+        void ofApp::drawWater(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& view);
+        glm::vec3 getLightDirection(DirectionalLight& l);
+        glm::vec3 getLightColor(DirectionalLight& l);
+        void ofApp::buildQuad(ofMesh& mesh, float w, float h);
 
-        DirectionalLight light;
+        // Actor properties
+        ofMesh actorMesh;
+        ofShader actorShader;
+        ofImage actorTexture;
+        ofImage actorSpecMap;
+        ofImage actorNormalMap;
+
+        // Water properties
+        ofMesh waterMesh;
+        ofShader waterShader;
+        ofImage waterNormalMap;
+
+        // Camera properties
         CameraData cam;
         glm::vec3 camInputDir;
 
-        glm::vec3 getLightDirection(DirectionalLight& l);
-        glm::vec3 getLightColor(DirectionalLight& l);
 };

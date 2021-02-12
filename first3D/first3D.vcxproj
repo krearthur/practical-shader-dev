@@ -180,10 +180,12 @@
     <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="src\ofApp.h" />
   </ItemGroup>
   <ItemGroup>
@@ -199,13 +201,15 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\data\diffuse.frag" />
-    <None Include="bin\data\mesh.vert" />
-    <None Include="bin\data\normal_vis.frag" />
-    <None Include="bin\data\passthrough.vert" />
-    <None Include="bin\data\rimlight.frag" />
-    <None Include="bin\data\specular.frag" />
-    <None Include="bin\data\uv_vis.frag" />
+    <None Include="bin\data\shaders\diffuse.frag" />
+    <None Include="bin\data\shaders\mesh.vert" />
+    <None Include="bin\data\shaders\normal_vis.frag" />
+    <None Include="bin\data\shaders\passthrough.vert" />
+    <None Include="bin\data\shaders\rimlight.frag" />
+    <None Include="bin\data\shaders\specular.frag" />
+    <None Include="bin\data\shaders\uv_vis.frag" />
+    <None Include="bin\data\shaders\water.frag" />
+    <None Include="bin\data\shaders\water.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ProjectExtensions>
