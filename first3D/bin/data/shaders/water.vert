@@ -21,8 +21,8 @@ void main()
 {
     float t = time * 0.05;
     float t2 = time * 0.02;
-    fragUV = vec2(uv.x + t, uv.y) * 3.0f;
-    fragUV2 = vec2(uv.x + t2, uv.y - t2) * 2.0f;
+    fragUV = vec2(uv.x + t * 0.5f, uv.y) * 3.0f ;
+    fragUV2 = vec2(uv.x + t2 * 0.5f, uv.y - t2 * 0.5f) * 2.0f ;
 
     // define the TBN (tangent-bitangent-normal) vectors and multiply by normalMatrix 
     // to transform them to world space

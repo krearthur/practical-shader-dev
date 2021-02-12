@@ -19,12 +19,11 @@ void main()
 {
     vec3 nrm = texture(normalMap, fragUV).xyz;
     nrm = normalize(nrm * 2.0 - 1.0); // convert the color ranges that go from 0 to 1, to a range from -1 to 1
-    nrm = normalize(TBN * nrm); // todo remove later
-
+    
     vec3 nrm2 = texture(normalMap, fragUV2).xyz;
     nrm2 = normalize(nrm2 * 2.0 - 1.0);
 
-    //nrm = normalize(TBN * (nrm + nrm2));
+    nrm = normalize(TBN * (nrm + nrm2));
 
     vec3 viewDir = normalize(cameraPos - fragWorldPos);
     vec3 halfVec = normalize(viewDir + lightDir);

@@ -42,6 +42,11 @@ private:
         glm::vec3 getLightColor(DirectionalLight& l);
         void ofApp::buildQuad(ofMesh& mesh, float w, float h);
 
+        // background props
+        ofMesh background;
+        ofShader bgShader;
+        ofImage bgImage;
+
         // Actor properties
         ofMesh actorMesh;
         ofShader actorShader;

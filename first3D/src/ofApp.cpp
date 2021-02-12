@@ -3,13 +3,15 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
     using namespace glm;
-    ofSetBackgroundColor(ofColor::bisque);
+    ofSetBackgroundColor(ofColor(255 * 0.1569f, 255 * 0.4549f, 255 * 0.698f));
     ofDisableArbTex();
     ofEnableDepthTest();
     ofEnableAlphaBlending();
     
-    actorMesh.load("models/hylian-shield.ply");
-    buildQuad(waterMesh, 2, 2);
+
+    actorMesh.load("models/hylian-shield2.ply");
+    //waterMesh.load("models/quad.ply");
+    buildQuad(waterMesh, 1, 1);
     
     actorShader.load("shaders/mesh.vert", "shaders/specular.frag");
     actorTexture.load("textures/shield-diffuse.png");
@@ -58,7 +60,7 @@ void ofApp::draw(){
     float aspect = window.x / window.y;
 
     mat4 view = inverse(translate(cam.position));
-    mat4 proj = perspective(cam.fov, aspect, 0.01f, 10.0f);
+    mat4 proj = perspective(cam.fov, aspect, 0.01f, 100.0f);
 
     drawShield(dirLight, proj, view);
     drawWater(waterLight, proj, view);
@@ -104,7 +106,7 @@ void ofApp::drawWater(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& vi
 
     vec3 right = vec3(1, 0, 0);
     mat4 rotation = rotate(radians(-90.0f), right);
-    mat4 model = rotation * scale(vec3(5.0f, 4.0f, 5.0f));
+    mat4 model = rotation * scale(vec3(10.0f, 5.0f, 1.0f));
     mat4 mvp = proj * view * model;
     mat3 normalMatrix = mat3(transpose(inverse(model)));
 
@@ -212,6 +214,7 @@ glm::vec3 ofApp::getLightColor(DirectionalLight& l) {
 
 void ofApp::buildQuad(ofMesh& mesh, float w, float h)
 {   
+    mesh.clear();
     // Define the four vertices for the quad
     float verts[] = {
     //   X       Y      Z
@@ -229,10 +232,15 @@ void ofApp::buildQuad(ofMesh& mesh, float w, float h)
 
         mesh.addVertex(glm::vec3(verts[idx], verts[idx + 1], verts[idx + 2]));
         mesh.addTexCoord(glm::vec2(uvs[uvIdx], uvs[uvIdx + 1]));
+        mesh.addNormal(glm::vec3(0, 0, 1));
+
     }
     
     ofIndexType indices[6] = { 0, 1, 2, 2, 3, 0 };
-    mesh.addIndices(indices, 6);
+//    mesh.addIndices(indices, 6);
+    mesh.addTriangle(0, 1, 2);
+    mesh.addTriangle(2, 3, 0);
+
 }
 
 void ofApp::calcTangents(ofMesh& mesh) {
