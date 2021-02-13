@@ -10,6 +10,7 @@
     <ClCompile Include="GameObject.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ofxEasyCubemap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -23,6 +24,7 @@
     <ClInclude Include="GameObject.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\ofxEasyCubemap.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />
