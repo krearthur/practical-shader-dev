@@ -1,6 +1,7 @@
 #version 410 
 
 uniform sampler2D normalMap;
+uniform samplerCube envMap;
 uniform vec3 lightDir;
 uniform vec3 lightCol;
 uniform vec3 ambientCol;
@@ -29,9 +30,13 @@ void main()
     vec3 halfVec = normalize(viewDir + lightDir);
 
     float diffAmt = max(0.0, dot(nrm, lightDir));
-    vec3 oceanBlue = vec3(0.3, 0.3, 0.4);
-    vec3 diffCol = oceanBlue * lightCol * diffAmt;
-    
+    vec3 oceanBlue = vec3(0.4, 0.4, 0.6);
+
+    // sample from envMap for simple reflection
+    vec3 reflCol = texture(envMap, reflect(-viewDir, nrm)).xyz;
+
+    vec3 diffCol = reflCol * oceanBlue * lightCol * diffAmt;
+
     // blinn-phong specular
     float specAmt = max(0.0, dot(halfVec, nrm)) ;
     float specBright = pow(specAmt, 512.0);

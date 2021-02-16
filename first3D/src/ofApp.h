@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxEasyCubemap.h"
 
 struct CameraData {
     glm::vec3 position;
@@ -12,6 +13,13 @@ struct DirectionalLight {
     glm::vec3 direction;
     glm::vec3 color;
     float intensity;
+};
+
+struct PointLight {
+    glm::vec3 position;
+    glm::vec3 color;
+    float intensity;
+    float radius;
 };
 
 class ofApp : public ofBaseApp{
@@ -36,16 +44,23 @@ class ofApp : public ofBaseApp{
 private:
         // Custom methods
         void calcTangents(ofMesh& mesh);
-        void ofApp::drawShield(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& view);
-        void ofApp::drawWater(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& view);
+
+        void ofApp::drawShield(PointLight& dirLight, glm::mat4& proj, glm::mat4& view);
+        void ofApp::drawWater(PointLight& dirLight, glm::mat4& proj, glm::mat4& view);
+        void ofApp::drawSkybox(PointLight& dirLight, glm::mat4& proj, glm::mat4& view);
+
+        //void ofApp::drawCube(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& view);
+
         glm::vec3 getLightDirection(DirectionalLight& l);
         glm::vec3 getLightColor(DirectionalLight& l);
+        
         void ofApp::buildQuad(ofMesh& mesh, float w, float h);
 
         // background props
         ofMesh background;
         ofShader bgShader;
-        ofImage bgImage;
+        ofShader skyboxShader;
+        ofxEasyCubemap skybox;
 
         // Actor properties
         ofMesh actorMesh;
@@ -62,5 +77,10 @@ private:
         // Camera properties
         CameraData cam;
         glm::vec3 camInputDir;
+        float camRot;
 
+        int mousePrevX;
+        int mousePrevY;
+        int mouseDeltaX;
+        int mouseDeltaY;
 };

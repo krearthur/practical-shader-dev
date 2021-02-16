@@ -13,12 +13,12 @@ void ofApp::setup(){
     //waterMesh.load("models/quad.ply");
     buildQuad(waterMesh, 1, 1);
     
-    actorShader.load("shaders/mesh.vert", "shaders/specular.frag");
+    actorShader.load("shaders/mesh.vert", "shaders/pointLightBlinnPhong.frag");
     actorTexture.load("textures/shield-diffuse.png");
     actorSpecMap.load("textures/shield-spec.png");
     actorNormalMap.load("textures/shield-normal2.png");
 
-    waterShader.load("shaders/water.vert", "shaders/water.frag");
+    waterShader.load("shaders/water.vert", "shaders/waterPointBlinnPhong.frag");
     waterNormalMap.load("textures/water_normal.png");
     waterNormalMap.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
 
@@ -29,6 +29,20 @@ void ofApp::setup(){
     // Setup Camera: move cam a bit out of screen
     cam.position = glm::vec3(0, 0.5f, .75f);
     cam.fov = radians(90.0f);
+
+    // Setup skybox cubemap
+    background.load("models/cube.ply");
+    //bgShader.load("shaders/cubemap.vert", "shaders/cubemap.frag");
+    skyboxShader.load("shaders/skybox.vert", "shaders/cubemap.frag");
+    skybox.load(
+        "textures/sky30/frontsh.jpg",
+        "textures/sky30/backsh.jpg",
+        "textures/sky30/leftsh.jpg",
+        "textures/sky30/rightsh.jpg",
+        "textures/sky30/toptsh.jpg",
+        "textures/sky30/botsh.jpg"
+    );
+
     
 }
 
@@ -38,6 +52,7 @@ void ofApp::update(){
     //charPos += vec3(inputDir.x * speed, inputDir.y * speed, 0);
 
     cam.position += camInputDir * speed;
+    cam.rotation += mouseDeltaX * ofGetLastFrameTime() * 10;
 }
 
 //--------------------------------------------------------------
@@ -50,6 +65,15 @@ void ofApp::draw(){
     dirLight.color = vec3(1, 1, 1);
     dirLight.intensity = 1.0f;
 
+    // Setup point light
+    static float t = 0.0f;
+    t += ofGetLastFrameTime();
+    PointLight pointLight;
+    pointLight.color = vec3(1, 1, 1);
+    pointLight.radius = 1.0f;
+    pointLight.position = vec3(sin(t), 0.5, 0.25);
+    pointLight.intensity = 3.0;
+
     // Setup water light (a bit like sun in the horizon)
     DirectionalLight waterLight;
     waterLight.direction = normalize(vec3(0.5, -1, 1));
@@ -59,22 +83,24 @@ void ofApp::draw(){
     vec2 window = ofGetWindowSize();
     float aspect = window.x / window.y;
 
-    mat4 view = inverse(translate(cam.position));
+    mat4 view = inverse(translate(cam.position) * rotate(radians(cam.rotation), vec3(0, 1, 0)));
     mat4 proj = perspective(cam.fov, aspect, 0.01f, 100.0f);
 
-    drawShield(dirLight, proj, view);
-    drawWater(waterLight, proj, view);
+    drawShield(pointLight, proj, view);
+    drawWater(pointLight, proj, view);
+    //drawCube(dirLight, proj, view);
+    drawSkybox(pointLight, proj, view);
 
 }
 
-void ofApp::drawShield(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& view) {
+void ofApp::drawShield(PointLight& light, glm::mat4& proj, glm::mat4& view) {
     using namespace glm;
 
     static float rotAngle = 0.0f;
-    rotAngle += 75 * ofGetLastFrameTime();
+    //rotAngle += 75 * ofGetLastFrameTime();
     vec3 up = vec3(0, 1, 0);
 
-    mat4 model = rotate(radians(rotAngle), up) * scale(vec3(0.5, 0.5f, 0.5f)) * translate(vec3(0, 1, 0));
+    mat4 model = rotate(radians(rotAngle), up) * scale(vec3(0.5, 0.5f, 0.5f)) * translate(vec3(0, 1, -0.5));
     mat3 normalMatrix = (transpose(inverse(mat3(model))));
     mat4 mvp = proj * view * model;
 
@@ -87,10 +113,13 @@ void ofApp::drawShield(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& v
     actorShader.setUniformTexture("mainTex", actorTexture, 0);
     actorShader.setUniformTexture("specMap", actorSpecMap, 1);
     actorShader.setUniformTexture("normalMap", actorNormalMap, 2);
+    actorShader.setUniformTexture("envMap", skybox.getTexture(), 3);
     actorShader.setUniform3f("cameraPos", cam.position);
     actorShader.setUniform3f("meshCol", glm::vec3(1, 1, 1));
-    actorShader.setUniform3f("lightDir", getLightDirection(dirLight));
-    actorShader.setUniform3f("lightCol", getLightColor(dirLight));
+    //actorShader.setUniform3f("lightDir", getLightDirection(dirLight));
+    actorShader.setUniform3f("lightCol", light.color * light.intensity);
+    actorShader.setUniform3f("lightPos", light.position);
+    actorShader.setUniform1f("lightRadius", light.radius);
     actorShader.setUniform3f("ambientCol", vec3(1, 1, 1) * 0.1);
 
     actorMesh.draw();
@@ -98,7 +127,7 @@ void ofApp::drawShield(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& v
 
 }
 
-void ofApp::drawWater(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& view) {
+void ofApp::drawWater(PointLight& light, glm::mat4& proj, glm::mat4& view) {
     using namespace glm;
 
     static float time = 0.0f;
@@ -118,8 +147,12 @@ void ofApp::drawWater(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& vi
     waterShader.setUniform1f("time", time);
     // Uniforms for fragment shader
     waterShader.setUniformTexture("normalMap", waterNormalMap, 0);
-    waterShader.setUniform3f("lightDir", getLightDirection(dirLight));
-    waterShader.setUniform3f("lightCol", getLightColor(dirLight));
+    waterShader.setUniformTexture("envMap", skybox.getTexture(), 1);
+    //waterShader.setUniform3f("lightDir", getLightDirection(dirLight));
+    //waterShader.setUniform3f("lightCol", getLightColor(dirLight));
+    waterShader.setUniform3f("lightCol", light.color * light.intensity);
+    waterShader.setUniform3f("lightPos", light.position);
+    waterShader.setUniform1f("lightRadius", light.radius);
     waterShader.setUniform3f("ambientCol", vec3(1, 1, 1) * 0.1f);
     waterShader.setUniform3f("cameraPos", cam.position);
     waterShader.setUniform1f("alpha", 1.0f);
@@ -127,6 +160,45 @@ void ofApp::drawWater(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& vi
     waterMesh.draw();
     waterShader.end();
 
+}
+
+//void ofApp::drawCube(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& view) {
+//    using namespace glm;
+//
+//    static float rotAngle = 0.0;
+//    rotAngle += 0.1f;
+//
+//    mat4 r = rotate(radians(rotAngle), vec3(0, 1, 0));
+//    mat4 s = scale(vec3(0.4, 0.4, 0.4));
+//    mat4 model = translate(vec3(0.0, 0.75, 0.0f)) * r * s;
+//    mat4 mvp = proj * view * model;
+//
+//    ofShader& shd = bgShader;
+//
+//    shd.begin();
+//    shd.setUniformMatrix4f("mvp", mvp);
+//    shd.setUniformTexture("envMap", skybox.getTexture(), 0);
+//    shd.setUniform3f("cameraPos", cam.position);
+//    background.draw();
+//    shd.end();
+//}
+
+void ofApp::drawSkybox(PointLight& dirLight, glm::mat4& proj, glm::mat4& view) {
+    using namespace glm;
+
+    // move the box center always to the cam position
+    mat4 model = translate(cam.position);
+    mat4 mvp = proj * view * model;
+
+    ofShader& shd = skyboxShader;
+
+    glDepthFunc(GL_LEQUAL);
+    shd.begin();
+    shd.setUniformMatrix4f("mvp", mvp);
+    shd.setUniformTexture("envMap", skybox.getTexture(), 0);
+    background.draw();
+    shd.end();
+    glDepthFunc(GL_LESS);
 }
 
 //--------------------------------------------------------------
@@ -161,7 +233,19 @@ void ofApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
+//    ofLog(OF_LOG_NOTICE, "mouse x:" + ofToString(x) + ", y:" + ofToString(y) );
 
+    if (mousePrevX == -1 && mousePrevY == -1) {
+        mousePrevX = x;
+        mousePrevY = y;
+        return;
+    }
+    return;
+    mouseDeltaX = mousePrevX - x;
+    mouseDeltaY = y - mousePrevY;
+
+    mousePrevX = x;
+    mousePrevY = y;
 }
 
 //--------------------------------------------------------------
@@ -186,7 +270,8 @@ void ofApp::mouseEntered(int x, int y){
 
 //--------------------------------------------------------------
 void ofApp::mouseExited(int x, int y){
-
+    mouseDeltaX = 0;
+    mouseDeltaY = 0;
 }
 
 //--------------------------------------------------------------

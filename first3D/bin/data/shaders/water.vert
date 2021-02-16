@@ -10,6 +10,7 @@ uniform mat3 normalMatrix; // transforms normals ( or any other vector) from obj
 uniform mat4 model;
 uniform float time;
 
+
 out vec2 fragUV;
 out vec2 fragUV2;
 

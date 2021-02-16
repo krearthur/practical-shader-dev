@@ -23,7 +23,7 @@ void main()
     float lightAmt = max(0.0, dot(normal, lightDir));
     vec3 fragLight = lightCol * lightAmt;
 
-    vec4 texCol = texture(mainTex, fragUV);
-
+    vec4 texCol = texture(mainTex, fragUV);  
+    
     outCol = vec4(texCol.rgb * meshCol * fragLight + rimAmt, texCol.a);
 }

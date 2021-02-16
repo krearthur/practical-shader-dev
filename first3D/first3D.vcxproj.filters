@@ -39,5 +39,8 @@
     <None Include="bin\data\shaders\uv_vis.frag" />
     <None Include="bin\data\shaders\water.vert" />
     <None Include="bin\data\shaders\water.frag" />
+    <None Include="bin\data\shaders\cubemap.frag" />
+    <None Include="bin\data\shaders\cubemap.vert" />
+    <None Include="bin\data\shaders\skybox.vert" />
   </ItemGroup>
 </Project>

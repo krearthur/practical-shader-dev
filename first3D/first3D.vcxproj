@@ -203,11 +203,14 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="bin\data\shaders\cubemap.frag" />
     <None Include="bin\data\shaders\diffuse.frag" />
     <None Include="bin\data\shaders\mesh.vert" />
     <None Include="bin\data\shaders\normal_vis.frag" />
     <None Include="bin\data\shaders\passthrough.vert" />
     <None Include="bin\data\shaders\rimlight.frag" />
+    <None Include="bin\data\shaders\cubemap.vert" />
+    <None Include="bin\data\shaders\skybox.vert" />
     <None Include="bin\data\shaders\specular.frag" />
     <None Include="bin\data\shaders\uv_vis.frag" />
     <None Include="bin\data\shaders\water.frag" />
