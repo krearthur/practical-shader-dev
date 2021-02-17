@@ -13,12 +13,12 @@ void ofApp::setup(){
     //waterMesh.load("models/quad.ply");
     buildQuad(waterMesh, 1, 1);
     
-    actorShader.load("shaders/mesh.vert", "shaders/pointLightBlinnPhong.frag");
+    actorShader.load("shaders/mesh.vert", "shaders/spotBlinnPhong.frag");
     actorTexture.load("textures/shield-diffuse.png");
     actorSpecMap.load("textures/shield-spec.png");
     actorNormalMap.load("textures/shield-normal2.png");
 
-    waterShader.load("shaders/water.vert", "shaders/waterPointBlinnPhong.frag");
+    waterShader.load("shaders/water.vert", "shaders/waterSpotBlinnPhong.frag");
     waterNormalMap.load("textures/water_normal.png");
     waterNormalMap.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
 
@@ -74,6 +74,14 @@ void ofApp::draw(){
     pointLight.position = vec3(sin(t), 0.5, 0.25);
     pointLight.intensity = 3.0;
 
+    // Setup spot light
+    SpotLight spotLight;
+    spotLight.color = vec3(1, 1, 1);
+    spotLight.position = cam.position;
+    spotLight.intensity = 1.0;
+    spotLight.direction = vec3(0, 0, -1); 
+    spotLight.cutoff = glm::cos(glm::radians(20.0));
+
     // Setup water light (a bit like sun in the horizon)
     DirectionalLight waterLight;
     waterLight.direction = normalize(vec3(0.5, -1, 1));
@@ -86,14 +94,14 @@ void ofApp::draw(){
     mat4 view = inverse(translate(cam.position) * rotate(radians(cam.rotation), vec3(0, 1, 0)));
     mat4 proj = perspective(cam.fov, aspect, 0.01f, 100.0f);
 
-    drawShield(pointLight, proj, view);
-    drawWater(pointLight, proj, view);
+    drawShield(spotLight, proj, view);
+    drawWater(spotLight, proj, view);
     //drawCube(dirLight, proj, view);
-    drawSkybox(pointLight, proj, view);
+    drawSkybox(spotLight, proj, view);
 
 }
 
-void ofApp::drawShield(PointLight& light, glm::mat4& proj, glm::mat4& view) {
+void ofApp::drawShield(SpotLight& light, glm::mat4& proj, glm::mat4& view) {
     using namespace glm;
 
     static float rotAngle = 0.0f;
@@ -117,17 +125,18 @@ void ofApp::drawShield(PointLight& light, glm::mat4& proj, glm::mat4& view) {
     actorShader.setUniform3f("cameraPos", cam.position);
     actorShader.setUniform3f("meshCol", glm::vec3(1, 1, 1));
     //actorShader.setUniform3f("lightDir", getLightDirection(dirLight));
+    actorShader.setUniform3f("lightConeDir", light.direction);
     actorShader.setUniform3f("lightCol", light.color * light.intensity);
     actorShader.setUniform3f("lightPos", light.position);
-    actorShader.setUniform1f("lightRadius", light.radius);
-    actorShader.setUniform3f("ambientCol", vec3(1, 1, 1) * 0.1);
+    actorShader.setUniform1f("lightCutoff", light.cutoff);
+    actorShader.setUniform3f("ambientCol", vec3(1, 1, 1) * 0.0);
 
     actorMesh.draw();
     actorShader.end();
 
 }
 
-void ofApp::drawWater(PointLight& light, glm::mat4& proj, glm::mat4& view) {
+void ofApp::drawWater(SpotLight& light, glm::mat4& proj, glm::mat4& view) {
     using namespace glm;
 
     static float time = 0.0f;
@@ -150,10 +159,11 @@ void ofApp::drawWater(PointLight& light, glm::mat4& proj, glm::mat4& view) {
     waterShader.setUniformTexture("envMap", skybox.getTexture(), 1);
     //waterShader.setUniform3f("lightDir", getLightDirection(dirLight));
     //waterShader.setUniform3f("lightCol", getLightColor(dirLight));
+    waterShader.setUniform3f("lightConeDir", light.direction);
     waterShader.setUniform3f("lightCol", light.color * light.intensity);
     waterShader.setUniform3f("lightPos", light.position);
-    waterShader.setUniform1f("lightRadius", light.radius);
-    waterShader.setUniform3f("ambientCol", vec3(1, 1, 1) * 0.1f);
+    waterShader.setUniform1f("lightCutoff", light.cutoff);
+    waterShader.setUniform3f("ambientCol", vec3(1, 1, 1) * 0.0f);
     waterShader.setUniform3f("cameraPos", cam.position);
     waterShader.setUniform1f("alpha", 1.0f);
 
@@ -183,7 +193,7 @@ void ofApp::drawWater(PointLight& light, glm::mat4& proj, glm::mat4& view) {
 //    shd.end();
 //}
 
-void ofApp::drawSkybox(PointLight& dirLight, glm::mat4& proj, glm::mat4& view) {
+void ofApp::drawSkybox(SpotLight& dirLight, glm::mat4& proj, glm::mat4& view) {
     using namespace glm;
 
     // move the box center always to the cam position

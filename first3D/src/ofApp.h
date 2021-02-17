@@ -22,6 +22,14 @@ struct PointLight {
     float radius;
 };
 
+struct SpotLight {
+    glm::vec3 position;
+    glm::vec3 direction;
+    float cutoff;
+    glm::vec3 color;
+    float intensity;
+};
+
 class ofApp : public ofBaseApp{
 
 	public:
@@ -45,9 +53,9 @@ private:
         // Custom methods
         void calcTangents(ofMesh& mesh);
 
-        void ofApp::drawShield(PointLight& dirLight, glm::mat4& proj, glm::mat4& view);
-        void ofApp::drawWater(PointLight& dirLight, glm::mat4& proj, glm::mat4& view);
-        void ofApp::drawSkybox(PointLight& dirLight, glm::mat4& proj, glm::mat4& view);
+        void ofApp::drawShield(SpotLight& dirLight, glm::mat4& proj, glm::mat4& view);
+        void ofApp::drawWater(SpotLight& dirLight, glm::mat4& proj, glm::mat4& view);
+        void ofApp::drawSkybox(SpotLight& dirLight, glm::mat4& proj, glm::mat4& view);
 
         //void ofApp::drawCube(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& view);
 
