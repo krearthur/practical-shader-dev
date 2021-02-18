@@ -28,6 +28,7 @@ struct SpotLight {
     float cutoff;
     glm::vec3 color;
     float intensity;
+    float hardness;
 };
 
 class ofApp : public ofBaseApp{
@@ -53,14 +54,21 @@ private:
         // Custom methods
         void calcTangents(ofMesh& mesh);
 
-        void ofApp::drawShield(SpotLight& dirLight, glm::mat4& proj, glm::mat4& view);
-        void ofApp::drawWater(SpotLight& dirLight, glm::mat4& proj, glm::mat4& view);
-        void ofApp::drawSkybox(SpotLight& dirLight, glm::mat4& proj, glm::mat4& view);
+        void drawShield(glm::mat4& proj, glm::mat4& view);
+        void drawWater(glm::mat4& proj, glm::mat4& view);
+        void drawSkybox(glm::mat4& proj, glm::mat4& view);
+
+        void putLightsInShader(ofShader& shader);
 
         //void ofApp::drawCube(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& view);
 
         glm::vec3 getLightDirection(DirectionalLight& l);
         glm::vec3 getLightColor(DirectionalLight& l);
+
+        // Lights
+        DirectionalLight dirLights[1];
+        PointLight pointLights[2];
+        SpotLight spotLights[2];
         
         void ofApp::buildQuad(ofMesh& mesh, float w, float h);
 

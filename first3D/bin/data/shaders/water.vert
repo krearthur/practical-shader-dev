@@ -13,6 +13,7 @@ uniform float time;
 
 out vec2 fragUV;
 out vec2 fragUV2;
+out vec2 origUV;
 
 out vec3 fragNormal;
 out vec3 fragWorldPos;
@@ -24,7 +25,8 @@ void main()
     float t2 = time * 0.02;
     fragUV = vec2(uv.x + t * 0.5f, uv.y) * 3.0f ;
     fragUV2 = vec2(uv.x + t2 * 0.5f, uv.y - t2 * 0.5f) * 2.0f ;
-
+    origUV = uv;
+    
     // define the TBN (tangent-bitangent-normal) vectors and multiply by normalMatrix 
     // to transform them to world space
     vec3 T = normalize( normalMatrix * tan.xyz );

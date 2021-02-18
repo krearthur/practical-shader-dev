@@ -20,11 +20,16 @@
       <option value="$PROJECT_DIR$/specular.frag" />
       <option value="$PROJECT_DIR$/PointLight.frag.glsl" />
       <option value="$PROJECT_DIR$/water.frag" />
-      <option value="$PROJECT_DIR$/blinnPhong.frag" />
       <option value="$PROJECT_DIR$/pointLightBlinnPhong.frag" />
       <option value="$PROJECT_DIR$/waterPointBlinnPhong.frag" />
+      <option value="$PROJECT_DIR$/blinnPhong.frag" />
+      <option value="$PROJECT_DIR$/pointBlinnPhong.frag" />
       <option value="$PROJECT_DIR$/spotBlinnPhong.frag" />
+      <option value="$PROJECT_DIR$/multiLights.frag" />
       <option value="$PROJECT_DIR$/waterSpotBlinnPhong.frag" />
+      <option value="$PROJECT_DIR$/water.vert" />
+      <option value="$PROJECT_DIR$/waterMultiLight.frag" />
+      <option value="$PROJECT_DIR$/multiLight.frag" />
     </changedPaths>
   </component>
   <component name="ProjectId" id="1oZSVceRip8ocSOHTmwVfzFcT7r" />
@@ -48,7 +53,8 @@
       <updated>1613492645601</updated>
       <workItem from="1613492654166" duration="32000" />
       <workItem from="1613492711341" duration="8402000" />
-      <workItem from="1613574902755" duration="6838000" />
+      <workItem from="1613574902755" duration="11262000" />
+      <workItem from="1613663727594" duration="6521000" />
     </task>
     <servers />
   </component>

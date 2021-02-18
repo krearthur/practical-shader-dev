@@ -31,7 +31,6 @@ float specular(vec3 lightDir, vec3 viewDir, vec3 nrm, float shininess)
     return pow(specAmt, shininess);
 }
 
-#define TAU 6.28318530718
 
 void main() 
 {
@@ -55,7 +54,7 @@ void main()
     //if (cosAngle > lightCutoff) falloff = 1; // hard falloff edge
     //falloff = (cosAngle - lightCutoff) / (1.0 - lightCutoff); // soft edge, shortened equation with linear falloff
     falloff = min(1.0, ((cosAngle / lightCutoff) -1 ) / (0.5 * ((1.0 / lightCutoff) - 1))); // soft edge, with more 100% light in the center
-    falloff = (max(0.0, cos( falloff * 4 * TAU )) + falloff) * 0.5; // light-ripples :P
+    //falloff = (max(0.0, cos( falloff * 4 * TAU )) + falloff) * 0.5; // light-ripples :P
     
     // Diffuse 
     float diffAmt = diffuse(lightDir, nrm) * falloff;
@@ -63,7 +62,7 @@ void main()
     vec3 diffCol = albedo * envCol * diffAmt;
 
     // Spec
-    float specAmt = specular(lightDir, viewDir, nrm, 8.0) * falloff;
+    float specAmt = specular(lightDir, viewDir, nrm, 16.0) * falloff;
     vec3 specCol = envCol * specAmt;
 
     // Ambient

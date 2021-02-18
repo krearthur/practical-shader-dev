@@ -1,4 +1,10 @@
 ﻿  ofApp.cpp
+d:\gamedev\openframeworks\of_v0.11.0_vs2017_release\apps\myapps\first3d\src\ofapp.cpp(47): warning C4018: '<': signed/unsigned mismatch
+d:\gamedev\openframeworks\of_v0.11.0_vs2017_release\apps\myapps\first3d\src\ofapp.cpp(56): warning C4018: '<': signed/unsigned mismatch
+d:\gamedev\openframeworks\of_v0.11.0_vs2017_release\apps\myapps\first3d\src\ofapp.cpp(66): warning C4018: '<': signed/unsigned mismatch
+d:\gamedev\openframeworks\of_v0.11.0_vs2017_release\apps\myapps\first3d\src\ofapp.cpp(173): warning C4018: '<': signed/unsigned mismatch
+d:\gamedev\openframeworks\of_v0.11.0_vs2017_release\apps\myapps\first3d\src\ofapp.cpp(178): warning C4018: '<': signed/unsigned mismatch
+d:\gamedev\openframeworks\of_v0.11.0_vs2017_release\apps\myapps\first3d\src\ofapp.cpp(184): warning C4018: '<': signed/unsigned mismatch
   first3D.vcxproj -> D:\Gamedev\OpenFrameworks\of_v0.11.0_vs2017_release\apps\myApps\first3D\bin\first3D_debug.exe
   
   	                   2	D:\Gamedev\OpenFrameworks\of_v0.11.0_vs2017_release\libs\fmodex\lib\vs\Win32\

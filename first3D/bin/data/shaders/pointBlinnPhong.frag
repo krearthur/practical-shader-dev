@@ -38,9 +38,10 @@ void main()
     vec3 nrm = texture(normalMap, fragUV).xyz;
     nrm = normalize(nrm * 2.0 - 1.0); // convert the color ranges that go from 0 to 1, to a range from -1 to 1
     nrm = normalize(TBN * nrm); // converting the Tangent Space normal to World Space
+
+    vec3 viewDir = normalize(cameraPos - fragWorldPos);
     
     // Reflection from environment map
-    vec3 viewDir = normalize(cameraPos - fragWorldPos);
     vec3 envSample = texture(envMap, reflect(-viewDir, nrm)).xyz;
     vec3 envCol = mix(lightCol, envSample + lightCol * 0.5, 0.5);
 

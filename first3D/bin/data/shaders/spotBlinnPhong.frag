@@ -41,9 +41,10 @@ void main()
     vec3 nrm = texture(normalMap, fragUV).xyz;
     nrm = normalize(nrm * 2.0 - 1.0); // convert the color ranges that go from 0 to 1, to a range from -1 to 1
     nrm = normalize(TBN * nrm); // converting the Tangent Space normal to World Space
+
+    vec3 viewDir = normalize(cameraPos - fragWorldPos);
     
     // Reflection from environment map
-    vec3 viewDir = normalize(cameraPos - fragWorldPos);
     vec3 envSample = texture(envMap, reflect(-viewDir, nrm)).xyz;
     vec3 envCol = mix(lightCol, envSample + lightCol * 0.5, 0.5);
 
@@ -55,7 +56,7 @@ void main()
     //if (cosAngle > lightCutoff) falloff = 1; // hard falloff edge
     //falloff = (cosAngle - lightCutoff) / (1.0 - lightCutoff); // soft edge, shortened equation with linear falloff
     falloff = min(1.0, ((cosAngle / lightCutoff) -1 ) / (0.7 * ((1.0 / lightCutoff) - 1))); // soft edge, with more 100% light in the center 
-    falloff = (max(0.0, cos( falloff * 4 * TAU )) + falloff) * 0.5;
+    //falloff = (max(0.0, cos( falloff * 4 * TAU )) + falloff) * 0.5;
     
     // Diffuse 
     float diffAmt = diffuse(lightDir, nrm) * falloff;

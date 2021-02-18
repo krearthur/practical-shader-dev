@@ -1,24 +1,23 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup(){
+void ofApp::setup() {
     using namespace glm;
     ofSetBackgroundColor(ofColor(255 * 0.1569f, 255 * 0.4549f, 255 * 0.698f));
     ofDisableArbTex();
     ofEnableDepthTest();
     ofEnableAlphaBlending();
-    
 
     actorMesh.load("models/hylian-shield2.ply");
     //waterMesh.load("models/quad.ply");
     buildQuad(waterMesh, 1, 1);
-    
-    actorShader.load("shaders/mesh.vert", "shaders/spotBlinnPhong.frag");
+
+    actorShader.load("shaders/mesh.vert", "shaders/multiLight.frag");
     actorTexture.load("textures/shield-diffuse.png");
     actorSpecMap.load("textures/shield-spec.png");
     actorNormalMap.load("textures/shield-normal2.png");
 
-    waterShader.load("shaders/water.vert", "shaders/waterSpotBlinnPhong.frag");
+    waterShader.load("shaders/water.vert", "shaders/waterMultiLight.frag");
     waterNormalMap.load("textures/water_normal.png");
     waterNormalMap.getTexture().setTextureWrap(GL_REPEAT, GL_REPEAT);
 
@@ -43,50 +42,52 @@ void ofApp::setup(){
         "textures/sky30/botsh.jpg"
     );
 
-    
+    // -------- Setup lights ----------
+
+    for (int i = 0; i < std::size(dirLights); ++i) {
+        DirectionalLight light;
+        light.direction = normalize(vec3(0.5, -1, 1));
+        light.color = vec3(1, 1, 1) * 0.5f ;
+        light.intensity = 1.0f;
+
+        dirLights[i] = light;
+    }
+
+    for (int i = 0; i < std::size(pointLights); ++i) {
+        PointLight light; 
+        light.color = vec3(1, 1, 0);
+        light.radius = 1.0f;
+        light.position = vec3((1 * i - 0.5) * 2, 0.5, 0.25);
+        light.intensity = 3.0;
+
+        pointLights[i] = light;
+    }
+
+    for (int i = 0; i < std::size(spotLights); ++i) {
+        SpotLight light;
+        light.color = vec3((float)i / std::size(spotLights) + 0.5f, 1 * i, 1) ;
+        light.position = cam.position + vec3((1 * i - 0.5) , 0, 1);
+        light.intensity = 1.0;
+        light.direction = vec3(0, 0, -1);
+        light.cutoff = glm::cos(glm::radians(15.0));
+        light.hardness = 0.7;
+
+        spotLights[i] = light;
+    }
+
 }
 
 //--------------------------------------------------------------
-void ofApp::update(){
+void ofApp::update() {
     float speed = 0.4 * ofGetLastFrameTime();
-    //charPos += vec3(inputDir.x * speed, inputDir.y * speed, 0);
 
     cam.position += camInputDir * speed;
     cam.rotation += mouseDeltaX * ofGetLastFrameTime() * 10;
 }
 
 //--------------------------------------------------------------
-void ofApp::draw(){
+void ofApp::draw() {
     using namespace glm;
-
-    // Setup shield model light
-    DirectionalLight dirLight;
-    dirLight.direction = normalize(vec3(0.5f, -1, -1));
-    dirLight.color = vec3(1, 1, 1);
-    dirLight.intensity = 1.0f;
-
-    // Setup point light
-    static float t = 0.0f;
-    t += ofGetLastFrameTime();
-    PointLight pointLight;
-    pointLight.color = vec3(1, 1, 1);
-    pointLight.radius = 1.0f;
-    pointLight.position = vec3(sin(t), 0.5, 0.25);
-    pointLight.intensity = 3.0;
-
-    // Setup spot light
-    SpotLight spotLight;
-    spotLight.color = vec3(1, 1, 1);
-    spotLight.position = cam.position;
-    spotLight.intensity = 1.0;
-    spotLight.direction = vec3(0, 0, -1); 
-    spotLight.cutoff = glm::cos(glm::radians(20.0));
-
-    // Setup water light (a bit like sun in the horizon)
-    DirectionalLight waterLight;
-    waterLight.direction = normalize(vec3(0.5, -1, 1));
-    waterLight.color = vec3(1, 1, 1);
-    waterLight.intensity = 1.0f;
 
     vec2 window = ofGetWindowSize();
     float aspect = window.x / window.y;
@@ -94,29 +95,29 @@ void ofApp::draw(){
     mat4 view = inverse(translate(cam.position) * rotate(radians(cam.rotation), vec3(0, 1, 0)));
     mat4 proj = perspective(cam.fov, aspect, 0.01f, 100.0f);
 
-    drawShield(spotLight, proj, view);
-    drawWater(spotLight, proj, view);
-    //drawCube(dirLight, proj, view);
-    drawSkybox(spotLight, proj, view);
-
+    drawSkybox(proj, view);
+    drawShield(proj, view);
+    drawWater(proj, view);
 }
 
-void ofApp::drawShield(SpotLight& light, glm::mat4& proj, glm::mat4& view) {
+void ofApp::drawShield(glm::mat4& proj, glm::mat4& view) {
     using namespace glm;
 
     static float rotAngle = 0.0f;
-    //rotAngle += 75 * ofGetLastFrameTime();
+    //rotAngle += ofGetLastFrameTime() * 25;
     vec3 up = vec3(0, 1, 0);
 
-    mat4 model = rotate(radians(rotAngle), up) * scale(vec3(0.5, 0.5f, 0.5f)) * translate(vec3(0, 1, -0.5));
+    mat4 model = translate(vec3(0, 0.5, -0.5)) * rotate(radians(rotAngle), up) * scale(vec3(1, 1, 1)) * 1;
     mat3 normalMatrix = (transpose(inverse(mat3(model))));
     mat4 mvp = proj * view * model;
 
     actorShader.begin();
+
     // Uniforms for vertex shader
     actorShader.setUniformMatrix4f("mvp", mvp);
     actorShader.setUniformMatrix4f("model", model);
     actorShader.setUniformMatrix3f("normalMatrix", normalMatrix);
+
     // Uniforms for fragment shader 
     actorShader.setUniformTexture("mainTex", actorTexture, 0);
     actorShader.setUniformTexture("specMap", actorSpecMap, 1);
@@ -124,19 +125,16 @@ void ofApp::drawShield(SpotLight& light, glm::mat4& proj, glm::mat4& view) {
     actorShader.setUniformTexture("envMap", skybox.getTexture(), 3);
     actorShader.setUniform3f("cameraPos", cam.position);
     actorShader.setUniform3f("meshCol", glm::vec3(1, 1, 1));
-    //actorShader.setUniform3f("lightDir", getLightDirection(dirLight));
-    actorShader.setUniform3f("lightConeDir", light.direction);
-    actorShader.setUniform3f("lightCol", light.color * light.intensity);
-    actorShader.setUniform3f("lightPos", light.position);
-    actorShader.setUniform1f("lightCutoff", light.cutoff);
     actorShader.setUniform3f("ambientCol", vec3(1, 1, 1) * 0.0);
+
+    putLightsInShader(actorShader);
 
     actorMesh.draw();
     actorShader.end();
 
 }
 
-void ofApp::drawWater(SpotLight& light, glm::mat4& proj, glm::mat4& view) {
+void ofApp::drawWater(glm::mat4& proj, glm::mat4& view) {
     using namespace glm;
 
     static float time = 0.0f;
@@ -144,32 +142,53 @@ void ofApp::drawWater(SpotLight& light, glm::mat4& proj, glm::mat4& view) {
 
     vec3 right = vec3(1, 0, 0);
     mat4 rotation = rotate(radians(-90.0f), right);
-    mat4 model = rotation * scale(vec3(10.0f, 5.0f, 1.0f));
+    mat4 model = rotation * scale(vec3(10.0f, 10.0f, 1.0f));
     mat4 mvp = proj * view * model;
     mat3 normalMatrix = mat3(transpose(inverse(model)));
 
+
     waterShader.begin();
+    
     // Uniforms for vertex shader
     waterShader.setUniformMatrix4f("mvp", mvp);
     waterShader.setUniformMatrix4f("model", model);
     waterShader.setUniformMatrix3f("normalMatrix", normalMatrix);
     waterShader.setUniform1f("time", time);
+
     // Uniforms for fragment shader
     waterShader.setUniformTexture("normalMap", waterNormalMap, 0);
     waterShader.setUniformTexture("envMap", skybox.getTexture(), 1);
-    //waterShader.setUniform3f("lightDir", getLightDirection(dirLight));
-    //waterShader.setUniform3f("lightCol", getLightColor(dirLight));
-    waterShader.setUniform3f("lightConeDir", light.direction);
-    waterShader.setUniform3f("lightCol", light.color * light.intensity);
-    waterShader.setUniform3f("lightPos", light.position);
-    waterShader.setUniform1f("lightCutoff", light.cutoff);
     waterShader.setUniform3f("ambientCol", vec3(1, 1, 1) * 0.0f);
     waterShader.setUniform3f("cameraPos", cam.position);
     waterShader.setUniform1f("alpha", 1.0f);
 
+    putLightsInShader(waterShader);
+
     waterMesh.draw();
     waterShader.end();
 
+}
+
+void ofApp::putLightsInShader(ofShader& shader) {
+    for (int i = 0; i < std::size(dirLights); ++i) {
+        DirectionalLight light = dirLights[i];
+        shader.setUniform3f("directionalLights[" + ofToString(i) + "].direction", getLightDirection(light));
+        shader.setUniform3f("directionalLights[" + ofToString(i) + "].color", getLightColor(light));
+    }
+    for (int i = 0; i < std::size(pointLights); ++i) {
+        PointLight light = pointLights[i];
+        shader.setUniform3f("pointLights[" + ofToString(i) + "].position", light.position);
+        shader.setUniform3f("pointLights[" + ofToString(i) + "].color", light.color * light.intensity);
+        shader.setUniform1f("pointLights[" + ofToString(i) + "].radius", light.radius);
+    }
+    for (int i = 0; i < std::size(spotLights); ++i) {
+        SpotLight light = spotLights[i];
+        shader.setUniform3f("spotLights[" + ofToString(i) + "].position", light.position);
+        shader.setUniform3f("spotLights[" + ofToString(i) + "].direction", light.direction);
+        shader.setUniform3f("spotLights[" + ofToString(i) + "].color", light.color * light.intensity);
+        shader.setUniform1f("spotLights[" + ofToString(i) + "].cutoff", light.cutoff);
+        shader.setUniform1f("spotLights[" + ofToString(i) + "].hardness", light.hardness);
+    }
 }
 
 //void ofApp::drawCube(DirectionalLight& dirLight, glm::mat4& proj, glm::mat4& view) {
@@ -193,7 +212,7 @@ void ofApp::drawWater(SpotLight& light, glm::mat4& proj, glm::mat4& view) {
 //    shd.end();
 //}
 
-void ofApp::drawSkybox(SpotLight& dirLight, glm::mat4& proj, glm::mat4& view) {
+void ofApp::drawSkybox(glm::mat4& proj, glm::mat4& view) {
     using namespace glm;
 
     // move the box center always to the cam position
@@ -212,7 +231,7 @@ void ofApp::drawSkybox(SpotLight& dirLight, glm::mat4& proj, glm::mat4& view) {
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key){
+void ofApp::keyPressed(int key) {
     camInputDir = glm::vec3(0.0, 0.0, 0.0);
     if (key == 'a') {
         camInputDir.x = -1.0;
@@ -235,15 +254,15 @@ void ofApp::keyPressed(int key){
 }
 
 //--------------------------------------------------------------
-void ofApp::keyReleased(int key){
-    if (key == 'a' || key == 'd' || key == 'w' || key == 's' || key =='q' || key == 'e') {
+void ofApp::keyReleased(int key) {
+    if (key == 'a' || key == 'd' || key == 'w' || key == 's' || key == 'q' || key == 'e') {
         camInputDir = glm::vec3(0.0, 0.0, 0.0);
     }
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
-//    ofLog(OF_LOG_NOTICE, "mouse x:" + ofToString(x) + ", y:" + ofToString(y) );
+void ofApp::mouseMoved(int x, int y) {
+    //    ofLog(OF_LOG_NOTICE, "mouse x:" + ofToString(x) + ", y:" + ofToString(y) );
 
     if (mousePrevX == -1 && mousePrevY == -1) {
         mousePrevX = x;
@@ -259,43 +278,43 @@ void ofApp::mouseMoved(int x, int y ){
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
+void ofApp::mouseDragged(int x, int y, int button) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
+void ofApp::mousePressed(int x, int y, int button) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
+void ofApp::mouseReleased(int x, int y, int button) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
+void ofApp::mouseEntered(int x, int y) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
+void ofApp::mouseExited(int x, int y) {
     mouseDeltaX = 0;
     mouseDeltaY = 0;
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
+void ofApp::windowResized(int w, int h) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
+void ofApp::gotMessage(ofMessage msg) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
+void ofApp::dragEvent(ofDragInfo dragInfo) {
 
 }
 
@@ -308,15 +327,15 @@ glm::vec3 ofApp::getLightColor(DirectionalLight& l) {
 }
 
 void ofApp::buildQuad(ofMesh& mesh, float w, float h)
-{   
+{
     mesh.clear();
     // Define the four vertices for the quad
     float verts[] = {
-    //   X       Y      Z
-        -w/2,    h/2,   0,   // 0 = left top
-        -w/2,   -h/2,   0,   // 1 = left bottom
-         w/2,   -h/2,   0,   // 2 = right bottom
-         w/2,    h/2,   0    // 3 = right top
+        //   X       Y      Z
+            -w / 2,    h / 2,   0,   // 0 = left top
+            -w / 2,   -h / 2,   0,   // 1 = left bottom
+             w / 2,   -h / 2,   0,   // 2 = right bottom
+             w / 2,    h / 2,   0    // 3 = right top
     };
 
     float uvs[] = { 0,0, 0,1, 1,1, 1,0 }; // same order as verts definition
@@ -330,9 +349,9 @@ void ofApp::buildQuad(ofMesh& mesh, float w, float h)
         mesh.addNormal(glm::vec3(0, 0, 1));
 
     }
-    
+
     ofIndexType indices[6] = { 0, 1, 2, 2, 3, 0 };
-//    mesh.addIndices(indices, 6);
+    //    mesh.addIndices(indices, 6);
     mesh.addTriangle(0, 1, 2);
     mesh.addTriangle(2, 3, 0);
 
